@@ -29,5 +29,7 @@ const thoughtSchema = new mongoose.Schema({
   // },
 });
 
+// TODO: reaction count virtual that retrieves the length of the throught's
+// reactions whatever that is
 const Thought = mongoose.model("Thought", thoughtSchema);
 module.exports = Thought;
