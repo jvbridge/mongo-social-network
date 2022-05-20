@@ -17,9 +17,8 @@ const userSchema = new mongoose.Schema({
       "Please enter a valid email address",
     ],
   },
-
-  // TODO: relationship to thoughs schema
-  // TODO: relationship to friends schema
+  thoughts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Thought" }],
+  friends: [this],
 });
 
 const User = mongoose.model("User", userSchema);
