@@ -1,0 +1,27 @@
+{
+  "name": "mongo-social-network",
+  "version": "1.0.0",
+  "description": "An implementation of a social network backend using MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "watch": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jvbridge/mongo-social-network.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jvbridge/mongo-social-network/issues"
+  },
+  "homepage": "https://github.com/jvbridge/mongo-social-network#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "mongoose": "^6.3.4",
+    "nodemon": "^2.0.16"
+  }
+}
