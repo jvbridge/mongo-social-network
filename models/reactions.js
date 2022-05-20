@@ -15,7 +15,6 @@ const reactionSchema = new mongoose.Schema({
     maxlength: 280,
   },
   username: {
-    // TODO: define relationship
     type: String,
     required: true,
   },
@@ -26,5 +25,4 @@ const reactionSchema = new mongoose.Schema({
   },
 });
 
-const Reaction = mongoose.model("Reaction", reactionSchema);
-module.exports = Reaction;
+module.exports = reactionSchema;

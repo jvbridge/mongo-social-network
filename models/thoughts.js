@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { getTimestamp } = require("../util/helpers");
+const reactionSchema = require("./reactions");
 
 const thoughtSchema = new mongoose.Schema({
   thoughtText: {
@@ -14,14 +15,11 @@ const thoughtSchema = new mongoose.Schema({
     default: Date.now,
     get: getTimestamp,
   },
-  // TODO: username relationship
-  // username: {
-  //   type: String,
-  //   required: true,
-  // },
-  // reactions: {
-  //   // Array of nested documents created with the reaction schema
-  // },
+  username: {
+    type: String,
+    required: true,
+  },
+  reactions: [reactionSchema],
 });
 
 // TODO: reaction count virtual that retrieves the length of the throught's
