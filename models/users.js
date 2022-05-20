@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
       "Please enter a valid email address",
     ],
   },
+
+  // TODO: relationship to thoughs schema
+  // TODO: relationship to friends schema
 });
 
 const User = mongoose.model("User", userSchema);
