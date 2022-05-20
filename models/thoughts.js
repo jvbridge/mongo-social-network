@@ -1,10 +1,5 @@
 const mongoose = require("mongoose");
-
-// getter function for timestamp
-// TODO: test
-const dateGetter = (date) => {
-  if (date) return date.toISOString().split("T")[0];
-};
+const { getTimestamp } = require("../util/helpers");
 
 const thoughtSchema = new mongoose.Schema({
   thoughtText: {
@@ -17,7 +12,7 @@ const thoughtSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    get: dateGetter,
+    get: getTimestamp,
   },
   // TODO: username relationship
   // username: {
