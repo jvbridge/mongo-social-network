@@ -22,10 +22,14 @@ db.once("open", async () => {
   await Thought.deleteMany({});
   await User.deleteMany({});
 
+  // CREATE USERS
+
   // get a bunch of random unique users
   const users = getRandomUsers(USER_COUNT);
   console.table(users);
   await User.collection.insertMany(users);
+
+  // ADD FRIENDS
 
   // lets give them all friends now
   // get references to them in the table
@@ -65,7 +69,7 @@ db.once("open", async () => {
   // we finished setting up our updates, this puts them through
   await Promise.all(friendPromises);
 
-  // now that everyone has some friends lets give them some thoughts
+  // CREATE THOUGHTS
 
   // we need to get all our users again because the old array is out of date now
   const allFriends = await User.find({});
@@ -88,16 +92,27 @@ db.once("open", async () => {
       }
       thoughtStrings.push(newThought);
     }
+
+    // an array to hold the Ids of the thoughts for updating the user
+    const thoughtIds = [];
+    // turn the thoughts into objects for insertion
     const thoughtObjs = thoughtStrings.map((thoughtText) => {
-      return { thoughtText, username: user.username };
+      // assign the ID here so we can properly update the user
+      const thoughtId = new ObjectId();
+      thoughtIds.push(thoughtId);
+      return { thoughtText, username: user.username, _id: thoughtId };
     });
 
-    // okay we've chosen our strings, lets set up the data insertion
+    // we've chosen our strings, lets set up the data insertion
     thoughtPromises.push(Thought.collection.insertMany(thoughtObjs));
+    // updates the user as well
+    thoughtPromises.push(
+      User.findOneAndUpdate({ _id: user.id }, { thoughts: thoughtIds })
+    );
   });
-
-  // setup complete, this executes its
+  // setup complete, this executes the data insertion and update
   await Promise.all(thoughtPromises);
+
   // we are now finished, exit node
   process.exit(0);
 });
