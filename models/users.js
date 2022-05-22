@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { getTimestamp } = require("../util/helpers");
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,6 +21,11 @@ const userSchema = new mongoose.Schema(
     },
     thoughts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Thought" }],
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+      get: getTimestamp,
+    },
   },
   {
     toJSON: {
@@ -28,7 +34,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.virtual("friendCount").get(() => {
+userSchema.virtual("friendCount").get(function () {
   return this.friends.length;
 });
 
