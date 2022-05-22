@@ -35,7 +35,11 @@ router.post("/", async (req, res) => {
     }
 
     // all clear lets make the user
-    const newUserData = await User.create({ ...newUser });
+    const newUserData = await User.create({
+      ...newUser,
+      friends: [],
+      thoughts: [],
+    });
     res.status(200).json(newUserData);
   } catch (err) {
     res.status(500).json(err);
