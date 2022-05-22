@@ -4,7 +4,6 @@ const { getRandomUsers } = require("./data");
 const ObjectId = require("mongoose").Types.ObjectId;
 const tweets = require("./tweets.json");
 const emoji = require("./emoji.json");
-const reactionSchema = require("../models/reactions");
 
 // number of users we will generate
 const USER_COUNT = 50;
