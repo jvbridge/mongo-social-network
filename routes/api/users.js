@@ -140,6 +140,48 @@ router.post("/:uid/friends/:fid", async (req, res) => {
   }
 });
 
+// Delete a friendship
+router.delete("/:uid/friends/:fid", async (req, res) => {
+  try {
+    if (req.params.uid === req.params.fid) {
+      res.status(400).json("You cannot be friends with yourself");
+      return;
+    }
+
+    const user = await User.findById(req.params.uid);
+    if (!user) {
+      res.status(404).json("Found no user with that id");
+      return;
+    }
+    const friend = await User.findById(req.params.fid);
+    if (!friend) {
+      res.status(404).json("Found no friend to add with that id");
+      return;
+    }
+
+    if (
+      !user.friends.includes(req.params.fid) ||
+      !friend.friends.includes(req.params.uid)
+    ) {
+      res.status(400).json("Friendship doesn't exist");
+      return;
+    }
+
+    // filter the friend out of the arrays
+    user.friends = user.friends.filter((curr) => curr != req.params.fid);
+    friend.friends = friend.friends.filter((curr) => curr != req.params.uid);
+
+    // do both at the same time to make transaction atomic
+    const saves = [user.save(), friend.save()];
+    await Promise.all(saves);
+
+    // alert user that operation was successful
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 router.put("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -151,8 +193,8 @@ router.put("/:id", async (req, res) => {
     // check body to see what to update
     if (req.body.email) {
       // check for duplicates
-      const emailExists = await User.find({ email: req.body.email });
-      if (emailExists.length) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      if (emailExists) {
         res
           .status(400)
           .json({ message: "email already exists", user: emailExists });
@@ -163,8 +205,8 @@ router.put("/:id", async (req, res) => {
 
     if (req.body.username) {
       // check for duplicates
-      const userExists = await User.find({ username: req.body.username });
-      if (userExists.length) {
+      const userExists = await User.findOne({ username: req.body.username });
+      if (userExists) {
         res
           .status(400)
           .json({ message: "username already exists", user: userExists });
@@ -184,7 +226,7 @@ router.put("/:id", async (req, res) => {
 // get a specific user by username
 router.get("/u/:username", async (req, res) => {
   try {
-    const user = await User.find({ username: req.params.username });
+    const user = await User.findOne({ username: req.params.username });
     if (!user) {
       res.sendStatus(404);
       return;
@@ -199,7 +241,7 @@ router.get("/u/:username", async (req, res) => {
 // get the friends of a username
 router.get("/u/:username/friends", async (req, res) => {
   try {
-    const user = await User.find({ username: req.params.username });
+    const user = await User.findOne({ username: req.params.username });
     if (!user) {
       res.sendStatus(404);
       return;
