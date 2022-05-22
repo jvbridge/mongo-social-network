@@ -119,26 +119,20 @@ const createThoughts = async () => {
  * helper function to create all the reactions
  */
 const createReactions = async () => {
+  console.log("Creating reactions, this takes a second");
   // get all the users
   const allUsers = await User.find({});
   const promises = [];
   // iterate over all users to add reactions on their posts.
-  allUsers.forEach(async (user) => {
-    // get all the references to the users friends
-    const friends = await User.find(
-      {
-        _id: { $in: user.friends },
-      },
-      (err, docs) => {
-        console.log(docs);
-      }
-    );
 
-    // get references to all the user's thoughts
+  for (let i = 0; i < allUsers.length; i++) {
+    const user = allUsers[i];
+    // get references to theeir friends and thoughts
+    const friends = await User.find({ _id: user.friends });
     const thoughts = await Thought.find({
-      username: user.username,
+      username: allUsers[i].username,
     });
-    // iterate over all of their posts
+
     thoughts.forEach((thought) => {
       // we will have a random number of reactions based on how many friends
       const reactionCount = Math.floor(Math.random() * user.friends.length);
@@ -152,17 +146,20 @@ const createReactions = async () => {
         // get a random friend to have the username
         const username =
           friends[Math.floor(Math.random() * friends.length)].username;
+        const createdAt = Date.now();
+        const reaction = { reactionId, reactionBody, username, createdAt };
         // add it to the array
-        reactions.push({ reactionId, reactionBody, username });
+        reactions.push(reaction);
       }
       // make the reactions a part of the array
       thought.reactions = reactions;
       // save it and push the promise to an array for later execution
       promises.push(thought.save());
     });
-  });
+  }
   // we've set up all the reactions, now we need to save them
   await Promise.all(promises);
+  console.log("Done with reactions");
 };
 
 // error handling
@@ -185,7 +182,7 @@ db.once("open", async () => {
 
   // helper function to create all the reactions
   await createReactions();
-
+  console.log("Seeding complete");
   // we are now finished, exit node
   process.exit(0);
 });
