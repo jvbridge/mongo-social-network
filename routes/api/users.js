@@ -10,9 +10,11 @@ router.get("/", async (req, res) => {
   }
 });
 
+// TODO: POST a new user
+
 router.get("/:id", async (req, res) => {
   try {
-    let userData = await User.findById(req.params.id, [
+    const userData = await User.findById(req.params.id, [
       "username",
       "email",
       "createdAt",
@@ -41,6 +43,21 @@ router.get("/:id", async (req, res) => {
       }),
     };
     res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.get("/:id/friends/", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id, "friends");
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
+    console.log("user: ", user);
+    const friends = await User.find({ _id: user.friends });
+    res.status(200).json(friends);
   } catch (err) {
     res.status(500).json(err);
   }
