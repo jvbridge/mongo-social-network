@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { User, Thought } = require("../../models");
 const ObjectId = require("mongoose").Types.ObjectId;
 
+// get all thoughts
 router.get("/", async (req, res) => {
   try {
     const thoughts = await Thought.find({});
@@ -11,6 +12,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// make a new thought
 router.post("/", async (req, res) => {
   try {
     const newThought = {
@@ -46,6 +48,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+// get a single thought
 router.get("/:id", async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.id);
@@ -59,6 +62,29 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// update a single thought
+router.put("/:id", async (req, res) => {
+  try {
+    const thought = await Thought.findById(req.params.id);
+    if (!thought) {
+      res.sendStatus(404);
+      return;
+    }
+    if (!req.body.thoughtText) {
+      res.status(400).json("missing body update text");
+      return;
+    }
+
+    thought.thoughtText = req.body.thoughtText;
+    await thought.save();
+
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// get a thought's reactions
 router.get("/:id/reactions", async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.id);
