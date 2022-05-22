@@ -94,6 +94,47 @@ router.get("/:id/friends/", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
+
+    // check body to see what to update
+    if (req.body.email) {
+      // check for duplicates
+      const emailExists = await User.find({ email: req.body.email });
+      if (emailExists.length) {
+        res
+          .status(400)
+          .json({ message: "email already exists", user: emailExists });
+        return;
+      }
+      user.email = req.body.email;
+    }
+
+    if (req.body.username) {
+      // check for duplicates
+      const userExists = await User.find({ username: req.body.username });
+      if (userExists.length) {
+        res
+          .status(400)
+          .json({ message: "username already exists", user: userExists });
+        return;
+      }
+      user.username = req.body.username;
+    }
+
+    // propogate changes
+    await user.save();
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // get a specific user by username
 router.get("/u/:username", async (req, res) => {
   try {
