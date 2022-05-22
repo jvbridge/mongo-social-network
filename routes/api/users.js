@@ -94,6 +94,52 @@ router.get("/:id/friends/", async (req, res) => {
   }
 });
 
+// add a friend relationship
+router.post("/:uid/friends/:fid", async (req, res) => {
+  try {
+    if (req.params.uid === req.params.fid) {
+      res.status(400).json("You cannot add yourself as a friend");
+      return;
+    }
+
+    const user = await User.findById(req.params.uid);
+    if (!user) {
+      res.status(404).json("Found no user with that id");
+      return;
+    }
+    const friend = await User.findById(req.params.fid);
+    if (!friend) {
+      res.status(404).json("Found no friend to add with that id");
+      return;
+    }
+
+    if (
+      user.friends.includes(req.params.fid) ||
+      friend.friends.includes(req.params.uid)
+    ) {
+      res.status(400).json("Friendship already exists");
+      return;
+    }
+    // make sure they already have arrays in case something caused them to not
+    if (!user.friends) user.friends = [];
+    if (!friend.friends) friend.friends = [];
+
+    // add both to their arrays
+    user.friends.push(req.params.fid);
+    friend.friends.push(req.params.uid);
+
+    const saves = [user.save(), friend.save()];
+
+    // do both at the same time to make transaction atomic
+    await Promise.all(saves);
+
+    // alert user that operation was successful
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 router.put("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
