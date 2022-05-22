@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User } = require("../../models");
+const { User, Thought } = require("../../models");
 
 router.get("/", async (req, res) => {
   try {
@@ -12,8 +12,35 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const user = await User.find({ _id: req.params.id });
-    user ? res.status(200).json(user) : res.sendStatus(404);
+    let userData = await User.findById(req.params.id, [
+      "username",
+      "email",
+      "createdAt",
+      "friends",
+    ]);
+    if (!userData) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const friendData = await User.find({ _id: userData.friends }, [
+      "username",
+      "email",
+      "createdAt",
+    ]);
+    const user = {
+      username: userData.username,
+      email: userData.email,
+      createdAt: userData.createdAt,
+      friends: friendData.map((friend) => {
+        return {
+          email: friend.email,
+          username: friend.username,
+          createdAt: friend.createdAt,
+        };
+      }),
+    };
+    res.status(200).json(user);
   } catch (err) {
     res.status(500).json(err);
   }
