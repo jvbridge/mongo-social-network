@@ -22,7 +22,6 @@ router.post("/", async (req, res) => {
       email: req.body.email,
       username: req.body.username,
     };
-    console.log("new user: ", newUser);
     // check if the user's email and password are already in the database
     const usernameExists = await User.find({ username: newUser.username });
     if (usernameExists.length > 0) {
@@ -88,7 +87,6 @@ router.get("/:id/friends/", async (req, res) => {
       res.sendStatus(404);
       return;
     }
-    console.log("user: ", user);
     const friends = await User.find({ _id: user.friends });
     res.status(200).json(friends);
   } catch (err) {
@@ -104,7 +102,23 @@ router.get("/u/:username", async (req, res) => {
       res.sendStatus(404);
       return;
     }
+
     res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// get the friends of a username
+router.get("/u/:username/friends", async (req, res) => {
+  try {
+    const user = await User.find({ username: req.params.username });
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
+    const friends = await User.find({ _id: user.friends });
+    res.status(200).json(friends);
   } catch (err) {
     res.status(500).json(err);
   }
