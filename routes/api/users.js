@@ -10,4 +10,13 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.find({ _id: req.params.id });
+    user ? res.status(200).json(user) : res.sendStatus(404);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 module.exports = router;
