@@ -3,6 +3,8 @@ const db = require("../config/connection");
 const { getRandomUsers } = require("./data");
 const ObjectId = require("mongoose").Types.ObjectId;
 const tweets = require("./tweets.json");
+const emoji = require("./emoji.json");
+const reactionSchema = require("../models/reactions");
 
 // number of users we will generate
 const USER_COUNT = 50;
@@ -113,6 +115,56 @@ const createThoughts = async () => {
   await Promise.all(thoughtPromises);
 };
 
+/**
+ * helper function to create all the reactions
+ */
+const createReactions = async () => {
+  // get all the users
+  const allUsers = await User.find({});
+  const promises = [];
+  // iterate over all users to add reactions on their posts.
+  allUsers.forEach(async (user) => {
+    // get all the references to the users friends
+    const friends = await User.find(
+      {
+        _id: { $in: user.friends },
+      },
+      (err, docs) => {
+        console.log(docs);
+      }
+    );
+
+    // get references to all the user's thoughts
+    const thoughts = await Thought.find({
+      username: user.username,
+    });
+    // iterate over all of their posts
+    thoughts.forEach((thought) => {
+      // we will have a random number of reactions based on how many friends
+      const reactionCount = Math.floor(Math.random() * user.friends.length);
+      // create all the reactions we want
+      const reactions = [];
+      for (let i = 0; i < reactionCount; i++) {
+        // id
+        const reactionId = new ObjectId();
+        // random reaction
+        const reactionBody = emoji[Math.floor(Math.random() * emoji.length)];
+        // get a random friend to have the username
+        const username =
+          friends[Math.floor(Math.random() * friends.length)].username;
+        // add it to the array
+        reactions.push({ reactionId, reactionBody, username });
+      }
+      // make the reactions a part of the array
+      thought.reactions = reactions;
+      // save it and push the promise to an array for later execution
+      promises.push(thought.save());
+    });
+  });
+  // we've set up all the reactions, now we need to save them
+  await Promise.all(promises);
+};
+
 // error handling
 db.on("error", (err) => err);
 
@@ -131,11 +183,8 @@ db.once("open", async () => {
   // helper function to create all the thoughts for the posts
   await createThoughts();
 
-  // we need to get all our users again because the old array is out of date now
-
-  // CREATE REACTIONS
-  // once again we need to get an updated list
-  const allThoughts = await User.find({});
+  // helper function to create all the reactions
+  await createReactions();
 
   // we are now finished, exit node
   process.exit(0);
