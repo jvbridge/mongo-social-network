@@ -89,6 +89,22 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// delete a single thought
+router.delete("/:id", async (req, res) => {
+  try {
+    const thought = await Thought.findById(req.params.id);
+    if (!thought) {
+      res.sendStatus(404);
+      return;
+    }
+
+    await thought.delete();
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // get a thought's reactions
 router.get("/:id/reactions", async (req, res) => {
   try {
