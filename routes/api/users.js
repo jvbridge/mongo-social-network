@@ -234,6 +234,43 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// Delete a user
+router.delete("/:id", async (req, res) => {
+  try {
+    // array of promises to execute all changes at once
+    const updates = [];
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
+
+    // start by finding their friends and removing them from their lists
+    const friends = await User.find({ _id: user.friends });
+
+    friends.forEach((friend) => {
+      friend.friends = friend.friends.filter((curr) => {
+        return curr.id != user.id;
+      });
+      // push the promise to an array for later execution
+      updates.push(friend.save());
+    });
+
+    // find all the thoughts they made and delete them!
+    updates.push(Thought.deleteMany({ _id: user.thoughts }));
+
+    // finally delete the user
+    updates.push(user.delete());
+
+    // execute all the changes now
+    await Promise.all(updates);
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // get a specific user by username
 router.get("/u/:username", async (req, res) => {
   try {
