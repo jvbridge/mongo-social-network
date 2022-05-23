@@ -54,17 +54,17 @@ router.get("/:id", async (req, res) => {
       "email",
       "createdAt",
       "friends",
+      "thoughts",
     ]);
     if (!userData) {
       res.sendStatus(404);
       return;
     }
 
-    const friendData = await User.find({ _id: userData.friends }, [
-      "username",
-      "email",
-      "createdAt",
-    ]);
+    const friendData = await User.find({ _id: userData.friends });
+
+    const thoughtData = await Thought.find({ _id: userData.thoughts });
+
     const user = {
       username: userData.username,
       email: userData.email,
@@ -74,6 +74,13 @@ router.get("/:id", async (req, res) => {
           email: friend.email,
           username: friend.username,
           createdAt: friend.createdAt,
+        };
+      }),
+      thoughts: thoughtData.map((thought) => {
+        return {
+          thoughtText: thought.thoughtText,
+          createdAt: thought.createdAt,
+          reactions: thought.reactions,
         };
       }),
     };
@@ -241,11 +248,7 @@ router.get("/u/:username", async (req, res) => {
       res.sendStatus(404);
       return;
     }
-    const friendData = await User.find({ _id: userData.friends }, [
-      "username",
-      "email",
-      "createdAt",
-    ]);
+    const friendData = await User.find({ _id: userData.friends });
     const thoughtData = await Thought.find({ _id: userData.thoughts });
 
     const user = {
