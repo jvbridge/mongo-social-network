@@ -54,17 +54,17 @@ router.get("/:id", async (req, res) => {
       "email",
       "createdAt",
       "friends",
+      "thoughts",
     ]);
     if (!userData) {
       res.sendStatus(404);
       return;
     }
 
-    const friendData = await User.find({ _id: userData.friends }, [
-      "username",
-      "email",
-      "createdAt",
-    ]);
+    const friendData = await User.find({ _id: userData.friends });
+
+    const thoughtData = await Thought.find({ _id: userData.thoughts });
+
     const user = {
       username: userData.username,
       email: userData.email,
@@ -74,6 +74,13 @@ router.get("/:id", async (req, res) => {
           email: friend.email,
           username: friend.username,
           createdAt: friend.createdAt,
+        };
+      }),
+      thoughts: thoughtData.map((thought) => {
+        return {
+          thoughtText: thought.thoughtText,
+          createdAt: thought.createdAt,
+          reactions: thought.reactions,
         };
       }),
     };
@@ -227,15 +234,79 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// get a specific user by username
-router.get("/u/:username", async (req, res) => {
+// Delete a user
+router.delete("/:id", async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username });
+    // array of promises to execute all changes at once
+    const updates = [];
+
+    const user = await User.findById(req.params.id);
     if (!user) {
       res.sendStatus(404);
       return;
     }
 
+    // start by finding their friends and removing them from their lists
+    const friends = await User.find({ _id: user.friends });
+
+    friends.forEach((friend) => {
+      friend.friends = friend.friends.filter((curr) => {
+        return curr.id != user.id;
+      });
+      // push the promise to an array for later execution
+      updates.push(friend.save());
+    });
+
+    // find all the thoughts they made and delete them!
+    updates.push(Thought.deleteMany({ _id: user.thoughts }));
+
+    // finally delete the user
+    updates.push(user.delete());
+
+    // execute all the changes now
+    await Promise.all(updates);
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// get a specific user by username
+router.get("/u/:username", async (req, res) => {
+  try {
+    const userData = await User.findOne({ username: req.params.username }, [
+      "username",
+      "email",
+      "createdAt",
+      "friends",
+      "thoughts",
+    ]);
+    if (!userData) {
+      res.sendStatus(404);
+      return;
+    }
+    const friendData = await User.find({ _id: userData.friends });
+    const thoughtData = await Thought.find({ _id: userData.thoughts });
+
+    const user = {
+      username: userData.username,
+      email: userData.email,
+      createdAt: userData.createdAt,
+      friends: friendData.map((friend) => {
+        return {
+          email: friend.email,
+          username: friend.username,
+          createdAt: friend.createdAt,
+        };
+      }),
+      thoughts: thoughtData.map((thought) => {
+        return {
+          thoughtText: thought.thoughtText,
+          createdAt: thought.createdAt,
+          reactions: thought.reactions,
+        };
+      }),
+    };
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json(err);
@@ -250,7 +321,15 @@ router.get("/u/:username/friends", async (req, res) => {
       res.sendStatus(404);
       return;
     }
-    const friends = await User.find({ _id: user.friends });
+    const friendData = await User.find({ _id: user.friends });
+
+    const friends = friendData.map((friend) => {
+      return {
+        username: friend.username,
+        email: friend.email,
+        createdAt: friend.createdAt,
+      };
+    });
     res.status(200).json(friends);
   } catch (err) {
     res.status(500).json(err);

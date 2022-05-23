@@ -89,6 +89,22 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// delete a single thought
+router.delete("/:id", async (req, res) => {
+  try {
+    const thought = await Thought.findById(req.params.id);
+    if (!thought) {
+      res.sendStatus(404);
+      return;
+    }
+
+    await thought.delete();
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // get a thought's reactions
 router.get("/:id/reactions", async (req, res) => {
   try {
@@ -125,6 +141,37 @@ router.post("/:id/reactions", async (req, res) => {
       return;
     }
     thought.reactions.push(newReaction);
+    await thought.save();
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// delete a reaction
+router.delete("/:tid/reactions/:rid", async (req, res) => {
+  try {
+    // find the thought
+    const thought = await Thought.findById(req.params.tid);
+    if (!thought) {
+      res.status(404).json("thought with that id not found");
+      return;
+    }
+
+    // find the reaction
+    const reaction = thought.reactions.find(
+      (element) => element.reactionId == req.params.rid
+    );
+
+    if (!reaction) {
+      res.status(404).json("reaction with that ID not found");
+      return;
+    }
+
+    // remove the reaction from the thoughts
+    thought.reactions = thought.reactions.filter(
+      (element) => element.reactionId != req.params.rid
+    );
     await thought.save();
     res.sendStatus(200);
   } catch (err) {
