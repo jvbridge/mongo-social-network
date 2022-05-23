@@ -25,6 +25,11 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    if (newThought.thoughtText.length > 280) {
+      res.status(400).json("Thought text too long");
+      return;
+    }
+
     const user = await User.findOne({ username: newThought.username });
     if (!user) {
       res.status(404).json("no username found for ", newThought.username);
@@ -93,6 +98,35 @@ router.get("/:id/reactions", async (req, res) => {
       return;
     }
     res.status(200).json(thought.reactions);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// add a new reaction to the post
+router.post("/:id/reactions", async (req, res) => {
+  try {
+    const thought = await Thought.findById(req.params.id);
+    if (!thought) {
+      res.sendStatus(404);
+      return;
+    }
+    const reactionId = new ObjectId();
+    const newReaction = {
+      reactionBody: req.body.reactionBody,
+      username: req.body.username,
+      reactionId,
+    };
+
+    // validate reaction
+    const user = await User.findOne({ username: newReaction.username });
+    if (!user) {
+      res.status(404).json(`User ${newReaction.username} does not exist`);
+      return;
+    }
+    thought.reactions.push(newReaction);
+    await thought.save();
+    res.sendStatus(200);
   } catch (err) {
     res.status(500).json(err);
   }
