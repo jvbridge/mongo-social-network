@@ -106,6 +106,10 @@ Seeding the database:
 
 This is simple video showing how the database gets seeded
 
+
+https://user-images.githubusercontent.com/6423593/169751212-44e6410d-b23f-4c9c-bc59-8ef7d7870849.mp4
+
+
 User operations:
 
 This video shows all the basic operations that can be made with a user.
@@ -115,6 +119,10 @@ This video shows all the basic operations that can be made with a user.
 * creating a friendship
 * deleting a friendship
 * deleting a user
+
+
+https://user-images.githubusercontent.com/6423593/169751887-ba76e0b9-2827-4147-929a-e758416e8090.mp4
+
 
 Thought operations
 
@@ -126,7 +134,7 @@ This video shows all the basic operations that can be done with thoughts
 * deleting a thought
 * deleting a user and showing the cascade to their thoughts
 
-
+https://user-images.githubusercontent.com/6423593/169751744-e99e4c64-2316-40cc-b339-edd859bb2a7b.mp4
 
 
 ## Technologies used
