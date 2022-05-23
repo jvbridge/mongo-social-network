@@ -2,9 +2,7 @@ const { DateTime } = require("luxon");
 
 // getter function for timestamp
 const getTimestamp = (date) => {
-  console.log("making datetime from : ", date);
   const get = DateTime.fromJSDate(date);
-  console.log("get is: ", get);
   return (
     get.toLocaleString(DateTime.DATE_FULL) +
     " at " +
