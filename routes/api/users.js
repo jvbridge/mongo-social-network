@@ -230,12 +230,34 @@ router.put("/:id", async (req, res) => {
 // get a specific user by username
 router.get("/u/:username", async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username });
-    if (!user) {
+    const userData = await User.findOne({ username: req.params.username }, [
+      "username",
+      "email",
+      "createdAt",
+      "friends",
+    ]);
+    if (!userData) {
       res.sendStatus(404);
       return;
     }
+    const friendData = await User.find({ _id: userData.friends }, [
+      "username",
+      "email",
+      "createdAt",
+    ]);
 
+    const user = {
+      username: userData.username,
+      email: userData.email,
+      createdAt: userData.createdAt,
+      friends: friendData.map((friend) => {
+        return {
+          email: friend.email,
+          username: friend.username,
+          createdAt: friend.createdAt,
+        };
+      }),
+    };
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json(err);
@@ -250,7 +272,15 @@ router.get("/u/:username/friends", async (req, res) => {
       res.sendStatus(404);
       return;
     }
-    const friends = await User.find({ _id: user.friends });
+    const friendData = await User.find({ _id: user.friends });
+
+    const friends = friendData.map((friend) => {
+      return {
+        username: friend.username,
+        email: friend.email,
+        createdAt: friend.createdAt,
+      };
+    });
     res.status(200).json(friends);
   } catch (err) {
     res.status(500).json(err);
