@@ -148,4 +148,35 @@ router.post("/:id/reactions", async (req, res) => {
   }
 });
 
+// delete a reaction
+router.delete("/:tid/reactions/:rid", async (req, res) => {
+  try {
+    // find the thought
+    const thought = await Thought.findById(req.params.tid);
+    if (!thought) {
+      res.status(404).json("thought with that id not found");
+      return;
+    }
+
+    // find the reaction
+    const reaction = thought.reactions.find(
+      (element) => element.reactionId == req.params.rid
+    );
+
+    if (!reaction) {
+      res.status(404).json("reaction with that ID not found");
+      return;
+    }
+
+    // remove the reaction from the thoughts
+    thought.reactions = thought.reactions.filter(
+      (element) => element.reactionId != req.params.rid
+    );
+    await thought.save();
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 module.exports = router;
