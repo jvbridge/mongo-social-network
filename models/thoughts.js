@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { getTimestamp } = require("../util/helpers");
+const { getTimestamp, setTimestamp } = require("../util/helpers");
 const reactionSchema = require("./reactions");
 
 const thoughtSchema = new mongoose.Schema(
@@ -13,7 +13,7 @@ const thoughtSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now,
+      default: setTimestamp,
       get: getTimestamp,
     },
     username: {
@@ -25,6 +25,7 @@ const thoughtSchema = new mongoose.Schema(
   {
     toJSON: {
       virtuals: true,
+      getters: true,
     },
   }
 );

@@ -4,7 +4,14 @@ const { User, Thought } = require("../../models");
 // get all users
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await User.find({}, [
+      "_id",
+      "username",
+      "email",
+      "createdAt",
+      "friends",
+      "thoughts",
+    ]);
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json(err);
