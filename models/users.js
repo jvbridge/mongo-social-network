@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { getTimestamp } = require("../util/helpers");
+const { getTimestamp, setTimestamp } = require("../util/helpers");
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema(
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: setTimestamp,
       get: getTimestamp,
     },
   },

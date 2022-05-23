@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 
-const { getTimestamp } = require("../util/helpers");
+const { getTimestamp, setTimestamp } = require("../util/helpers");
 
 const reactionSchema = new mongoose.Schema({
   // reaction stuff!
