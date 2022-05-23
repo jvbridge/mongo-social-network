@@ -235,6 +235,7 @@ router.get("/u/:username", async (req, res) => {
       "email",
       "createdAt",
       "friends",
+      "thoughts",
     ]);
     if (!userData) {
       res.sendStatus(404);
@@ -245,6 +246,7 @@ router.get("/u/:username", async (req, res) => {
       "email",
       "createdAt",
     ]);
+    const thoughtData = await Thought.find({ _id: userData.thoughts });
 
     const user = {
       username: userData.username,
@@ -255,6 +257,13 @@ router.get("/u/:username", async (req, res) => {
           email: friend.email,
           username: friend.username,
           createdAt: friend.createdAt,
+        };
+      }),
+      thoughts: thoughtData.map((thought) => {
+        return {
+          thoughtText: thought.thoughtText,
+          createdAt: thought.createdAt,
+          reactions: thought.reactions,
         };
       }),
     };
